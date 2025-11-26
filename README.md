@@ -114,14 +114,6 @@ The dataset contains:
      - `confidence` – highest similarity score among results
      - Optional `context` preview for reference
 
----
-
-## Features
-- Incremental addition of new documents without rebuilding the index.
-- Supports multiple file formats for document ingestion.
-- Fast semantic search using FAISS vector database.
-- Context-aware, accurate answers via Groq LLM.
-
 ### RAG Pipeline Flow
 
 ```
