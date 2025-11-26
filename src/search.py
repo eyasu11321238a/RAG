@@ -2,7 +2,7 @@
 import os
 from dotenv import load_dotenv
 from langchain_groq import ChatGroq
-from src.vectorstore import FaissVectorStore
+from src.vectorstore import FaissVectorStore  # ✅ FIXED: Import added
 from src.data_loader import load_all_documents
 
 load_dotenv()
@@ -14,18 +14,47 @@ class RAGSearch:
                  llm_model="llama-3.1-8b-instant"):
 
         self.vectorstore = FaissVectorStore(persist_dir, embedding_model)
+        self.data_dir = "data"
 
-        # Auto-load or build vectorstore
-        if not os.path.exists(f"{persist_dir}/faiss.index"):
-            print("[DEBUG] Building new vectorstore...")
-            docs = load_all_documents("data")
-            self.vectorstore.build_from_documents(docs)
-        else:
-            print("[DEBUG] Loading existing vectorstore...")
-            self.vectorstore.load()
+        # Smart initialization: only build if necessary
+        self._initialize_vectorstore()
 
         groq_key = os.getenv("GROQ_API_KEY")
         self.llm = ChatGroq(groq_api_key=groq_key, model_name=llm_model)
+
+    def _initialize_vectorstore(self):
+        """
+        Initialize vector store intelligently:
+        - Load if exists
+        - Build if doesn't exist
+        - Add new documents if some are missing
+        """
+        if self.vectorstore.exists():
+            print("[INFO] Loading existing vectorstore...")
+            self.vectorstore.load()
+            
+            # Check for new documents
+            print("[INFO] Checking for new documents...")
+            all_docs = load_all_documents(self.data_dir)
+            self.vectorstore.add_documents(all_docs)
+        else:
+            print("[INFO] No existing vectorstore found. Building new one...")
+            docs = load_all_documents(self.data_dir)
+            self.vectorstore.build_from_documents(docs)
+
+    def rebuild_index(self):
+        """Force rebuild the entire vector store."""
+        docs = load_all_documents(self.data_dir)
+        self.vectorstore.rebuild(docs)
+
+    def add_new_documents(self):
+        """Scan data directory and add any new documents."""
+        docs = load_all_documents(self.data_dir)
+        self.vectorstore.add_documents(docs)
+
+    def get_index_info(self):
+        """Get information about the current vector store."""
+        return self.vectorstore.get_stats()
 
     def search_advanced(
         self,
@@ -34,13 +63,13 @@ class RAGSearch:
         min_score: float = 0.2,
         return_context: bool = False,
     ):
-        # 1. Query vector store
+        # Query vector store
         raw_results = self.vectorstore.query(query, top_k)
 
         def to_similarity(dist):
             return 1.0 / (1.0 + float(dist))
 
-        # 2. Filter by score
+        # Filter by score
         results = []
         for r in raw_results:
             sim = to_similarity(r["distance"])
@@ -56,7 +85,7 @@ class RAGSearch:
                 "context": "" if return_context else None,
             }
 
-        # 3. Build context and formatted source metadata
+        # Build context and formatted source metadata
         context_chunks = []
         source_list = []
 
@@ -64,7 +93,6 @@ class RAGSearch:
             meta = r["metadata"]
             text = meta.get("text", "")
 
-            # Fixed: Now correctly accessing the metadata fields
             source_list.append({
                 "source": meta.get("source_file"),
                 "page": meta.get("page"),
@@ -77,7 +105,7 @@ class RAGSearch:
         full_context = "\n\n".join(context_chunks)
         confidence = max(r["similarity_score"] for r in results)
 
-        # 4. Ask LLM
+        # Ask LLM
         prompt = f"""Use the following context to answer the user's question concisely and accurately.
 
 Context:

@@ -12,7 +12,7 @@ from langchain_community.document_loaders.excel import UnstructuredExcelLoader
 
 
 # ---------------------------------------------------------
-# 🔧 Metadata Normalization Helper
+#  Metadata Normalization Helper
 # ---------------------------------------------------------
 def normalize_metadata(docs, source_file):
     """
@@ -38,7 +38,7 @@ def normalize_metadata(docs, source_file):
 
 
 # ---------------------------------------------------------
-# 📥 Load ALL documents from /data
+#  Load ALL documents from /data
 # ---------------------------------------------------------
 def load_all_documents(data_dir: str) -> List[Any]:
     """
@@ -87,17 +87,40 @@ def load_all_documents(data_dir: str) -> List[Any]:
     # -----------------------
     # CSV Files
     # -----------------------
+    # CSV Files
     csv_files = list(data_path.glob("**/*.csv"))
     print(f"[DEBUG] Found {len(csv_files)} CSV files")
 
     for csv_file in csv_files:
         print(f"[DEBUG] Loading CSV: {csv_file}")
         try:
-            loader = CSVLoader(str(csv_file))
-            loaded = loader.load()
-            docs = normalize_metadata(loaded, csv_file.name)
-            documents.extend(docs)
-            print(f"[DEBUG] Loaded {len(docs)} CSV rows")
+            # Try different encodings
+            encodings = ['utf-8', 'latin-1', 'iso-8859-1', 'cp1252']
+            loaded = None
+            
+            for encoding in encodings:
+                try:
+                    loader = CSVLoader(
+                        str(csv_file),
+                        encoding=encoding,
+                        csv_args={
+                            'delimiter': ',',
+                            'quotechar': '"',
+                        }
+                    )
+                    loaded = loader.load()
+                    print(f"[DEBUG] Successfully loaded CSV with {encoding} encoding")
+                    break
+                except Exception as e:
+                    continue
+            
+            if loaded:
+                docs = normalize_metadata(loaded, csv_file.name)
+                documents.extend(docs)
+                print(f"[DEBUG] Loaded {len(docs)} CSV rows")
+            else:
+                print(f"[WARNING] Could not load CSV {csv_file.name} with any encoding")
+                
         except Exception as e:
             print(f"[ERROR] Failed to load CSV {csv_file}: {e}")
 
