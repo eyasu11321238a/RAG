@@ -1,4 +1,4 @@
-# RAG (Retrieval-Augmented Generation) Project
+# RAG (Retrieval-Augmented Generation) Project.
 
 A Retrieval-Augmented Generation system is designed to answer questions from financial reports using advanced natural language processing and vector search techniques.
 
