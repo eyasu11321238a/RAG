@@ -10,7 +10,7 @@ RAG enhances Large Language Models (LLMs) by retrieving relevant information fro
 
 ## RAG Conceptual Model
 
-[Conceptual Model]("RAG_conceptual_model.png")
+![Conceptual Model]("RAG_conceptual_model.png")
 
 ## Features
 
