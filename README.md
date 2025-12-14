@@ -8,6 +8,10 @@ This project implements a RAG system that enables intelligent question-answering
 
 RAG enhances Large Language Models (LLMs) by retrieving relevant information from external knowledge sources before generating responses, ensuring answers are grounded in actual data rather than relying solely on the model's training data.
 
+## RAG Conceptual Model
+
+[Conceptual Model]("RAG_conceptual_model.png")
+
 ## Features
 
 - **Document Processing**: Handles financial reports and extracts meaningful information
