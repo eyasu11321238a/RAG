@@ -14,7 +14,16 @@ RAG enhances Large Language Models (LLMs) by retrieving relevant information fro
 <img src="RAG_conceptual_model.png" alt="Conceptual Model" width="60%"/>
 
 
+## User Interface
 
+- The project includes a Streamlit chatbot UI:
+
+- Users open a web page
+
+- Type questions in natural language
+
+- Get answers with sources and confidence
+  
 ## Features
 
 - **Document Processing**: Handles financial reports and extracts meaningful information
@@ -78,7 +87,18 @@ The dataset contains:
    ```bash
    pip install -r requirements.txt
    ```
+   
+   **Run the Chatbot Application**
 
+   From the project root:
+    ```bash
+   streamlit run app.py
+   ```
+   Then open the URL shown in the terminal (usually):
+    ```bash
+   http://localhost:8501
+   ```
+    
 ## Technologies Used
 
 - **Python 3.8+**: Core programming language
@@ -87,6 +107,7 @@ The dataset contains:
 - **FAISS/ChromaDB**: Vector database for similarity search
 - **Groq API**: Language model integration (llm model="llama-3.1-8b-instant")
 - **Embedding model**: ="all-MiniLM-L6-v2",
+- **Streamlit**: For basic UI entry point
 
 
 ## How It Works
